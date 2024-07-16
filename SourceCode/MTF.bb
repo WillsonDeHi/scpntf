@@ -350,6 +350,208 @@ End Type
 
 Global MapCubeMap.CubeMap
 
+Function UseChatSounds()
+
+	If KeyHit(45)
+		If (Not ChatSFXOpened%)
+			ChatSFXOpenedTimer# = 0.0
+			ChatSFXOpened% = True
+			FlushKeys()
+		EndIf
+	EndIf
+	
+	If NTF_RadioCHN <> 3 Then ChatSFXOpened% = False
+	
+	If ChatSFXOpened% = True
+		If ChatSFXOpenedTimer# < 500.0
+			ChatSFXOpenedColorFloat# = 255.0
+			ChatSFXOpenedTimer# = ChatSFXOpenedTimer# + FPSfactor
+		Else
+			If ChatSFXOpenedColorFloat# > 3.0
+				ChatSFXOpenedColorFloat# = ChatSFXOpenedColorFloat# - (2*FPSFactor)
+			Else
+				ChatSFXOpened% = False
+			EndIf
+		EndIf
+		ChatSFXOpenedColor% = Int(ChatSFXOpenedColorFloat#)
+		
+		For np.NPCs = Each NPCs
+			dist = EntityDistance(np\Collider,Collider)
+			If dist < 10.0
+				If np\NPCtype = NPCtype173
+					If KeyHit(2)
+						PlayChatSound("173spotted1")
+						ChatSFXOpenedTimer# = 500.0
+						If Contain173State% < 2
+							Contain173State% = 1
+						EndIf
+					EndIf
+					If KeyHit(7)
+						If Contain173State% > 2
+							PlayChatSound("173box",1,2)
+							ChatSFXOpenedTimer# = 500.0
+						EndIf
+					EndIf
+					If KeyHit(8)
+						If Contain173State% = 3
+							For r.Rooms = Each Rooms
+								If r\RoomTemplate\Name$ = "Cont_173"
+									If PlayerRoom = r
+										DebugLog Distance(EntityX(Curr173\Collider),EntityZ(Curr173\Collider),EntityX(r\obj,True)+1024*RoomScale,EntityZ(r\obj,True)+384*RoomScale)
+										If Distance(EntityX(Curr173\Collider),EntityZ(Curr173\Collider),EntityX(r\obj,True)+1024*RoomScale,EntityZ(r\obj,True)+384*RoomScale)>13.0 Then
+											PlayChatSound("173cont1")
+											ChatSFXOpenedTimer# = 500.0
+											Curr173\Idle = 3
+											Curr173\TargetEnt% = 0
+											Contain173State% = 4
+										EndIf
+									EndIf
+									Exit
+								EndIf
+							Next
+						EndIf
+					EndIf
+					If KeyHit(9)
+						If Contain173State% = 4
+							PlayChatSound("173cont",2,3)
+							ChatSFXOpenedTimer# = 500.0
+						EndIf
+					EndIf
+				ElseIf np\NPCtype = NPCtype106
+					If KeyHit(2)
+						PlayChatSound("106spotted",1,3)
+						ChatSFXOpenedTimer# = 500.0
+					EndIf
+				ElseIf np\NPCtype = NPCtype096
+					If KeyHit(2)
+						PlayChatSound("096spotted")
+						ChatSFXOpenedTimer# = 500.0
+					EndIf
+				ElseIf np\NPCtype = NPCtypeZombie
+					If KeyHit(2)
+						PlayChatSound("0491")
+						ChatSFXOpenedTimer# = 500.0
+					EndIf
+					If KeyHit(7)
+						PlayChatSound("0492")
+						ChatSFXOpenedTimer# = 500.0
+					EndIf
+				ElseIf np\NPCtype = NPCtypeD2
+					If KeyHit(2)
+						PlayChatSound("thereheis",1,3)
+						ChatSFXOpenedTimer# = 500.0
+					EndIf
+					If KeyHit(3)
+						PlayChatSound("stop",0,2)
+						ChatSFXOpenedTimer# = 500.0
+					EndIf
+					If KeyHit(7)
+						PlayChatSound("targetterminated",1,3)
+						ChatSFXOpenedTimer# = 500.0
+					EndIf
+				EndIf
+			EndIf
+		Next
+		
+		If KeyHit(4)
+			PlayChatSound("searching",1,3)
+			ChatSFXOpenedTimer# = 500.0
+		EndIf
+		If KeyHit(5)
+			PlayChatSound("targetlost",1,2)
+			ChatSFXOpenedTimer# = 500.0
+		EndIf	EndIf	
+	Local e.Events
+	For e.Events = Each Events
+		If e\EventName = "room2_tesla" And PlayerRoom = e\room Then
+			If e\EventState <> 3 Then
+				If ChatSFXOpened = True And KeyHit(6) And e\EventState3 = 0 Then
+					PlayChatSound("tesla0")
+					ChatSFXOpenedTimer# = 500.0
+					e\EventState3 = 1
+				EndIf
+				If e\EventState3 >= 1 Then
+					If e\EventState3 >= 70*5 Then
+						StopChannel(e\SoundCHN)
+						PlayAnnouncement("SFX\Character\MTF\Tesla"+Rand(1,3)+".ogg")
+						e\EventState = 3
+						e\EventState2 = -70*90
+						e\EventState3 = 0
+					Else
+						e\EventState3 = e\EventState3+FPSfactor
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Next	
+End Function
+
+Function RenderChatSounds()
+	
+	If ChatSFXOpened% = True
+		SetFont fo\ConsoleFont
+		Color 255,255,255
+		Text 20,(opt\GraphicHeight/2)-80,"1 Spotted"
+		Text 20,(opt\GraphicHeight/2)-60,"2 Stop right there"
+		Text 20,(opt\GraphicHeight/2)-40,"3 Searching"
+		Text 20,(opt\GraphicHeight/2)-20,"4 Target lost"
+		Text 20,(opt\GraphicHeight/2),"5 Tesla"
+		Text 20,(opt\GraphicHeight/2)+80,"6 Target terminated"
+	EndIf
+	
+End Function
+
+Function PlayChatSound(sound$,Min%=0,Max%=0)
+	Local random% = Rand(Min%,Max%)
+	
+	If ChannelPlaying(ChatSFXCHN) Then StopChannel(ChatSFXCHN)
+	
+	;ChatSFXCHN = PlaySound_Strict(ChatSFX_On)
+	ChatSFX_CurrSound = 1
+	If ChannelPlaying(NTF_ChatCHN1) Then StopChannel(NTF_ChatCHN1)
+	If ChannelPlaying(NTF_ChatCHN2) Then StopChannel(NTF_ChatCHN2)
+	If NTF_ChatSFX1 <> 0 Then FreeSound_Strict NTF_ChatSFX1 : NTF_ChatSFX1 = 0
+	If NTF_ChatSFX2 <> 0 Then FreeSound_Strict NTF_ChatSFX2 : NTF_ChatSFX2 = 0
+	If Min%=0 And Max%=0
+		NTF_ChatSFX1 = LoadSound_Strict("SFX\MTF\Player_Normal\"+sound$+".ogg")
+		NTF_ChatSFX2 = LoadSound_Strict("SFX\MTF\Player_GasMask\"+sound$+".ogg")
+	Else
+		NTF_ChatSFX1 = LoadSound_Strict("SFX\MTF\Player_Normal\"+(sound$+random%)+".ogg")
+		NTF_ChatSFX2 = LoadSound_Strict("SFX\MTF\Player_GasMask\"+(sound$+random%)+".ogg")
+	EndIf
+	NTF_ChatCHN1 = 0
+	NTF_ChatCHN2 = 0
+	DebugLog "NTF_ChatSFX1 = "+NTF_ChatSFX1
+   DebugLog "NTF_ChatSFX2 = "+NTF_ChatSFX2 
+End Function
+
+Function UpdateChatSound()
+	
+	If ChatSFX_CurrSound = 1
+		If (Not ChannelPlaying(ChatSFXCHN))
+			NTF_ChatCHN1 = PlaySound_Strict(NTF_ChatSFX1)
+			NTF_ChatCHN2 = PlaySound_Strict(NTF_ChatSFX2)
+			ChatSFX_CurrSound = 2
+		EndIf
+	ElseIf ChatSFX_CurrSound = 2
+		If (Not ChannelPlaying(NTF_ChatCHN1)) And (Not ChannelPlaying(NTF_ChatCHN2))
+			ChatSFXCHN = PlaySound_Strict(ChatSFX_Off)
+			ChatSFX_CurrSound = 0
+		EndIf
+	EndIf
+	
+	If WearingGasMask
+		ChannelVolume NTF_ChatCHN1,0.0
+		ChannelVolume NTF_ChatCHN2,1.0*opt\SFXVolume#
+	Else
+		ChannelVolume NTF_ChatCHN1,1.0*opt\SFXVolume#
+		ChannelVolume NTF_ChatCHN2,0.0
+	EndIf
+	
+	ChannelVolume ChatSFXCHN,1.0*opt\SFXVolume#
+	
+End Function
+
 Function LoadModStuff()
 	Local temp#,i
 	

@@ -212,7 +212,7 @@ Function MainLoopMenu()
 		Color 255,255,255
 		If opt\ShowFPS Then Text 20, 20, "FPS: " + ft\fps
 		If EndingTimer >= 0.0 Then
-			Text 20,opt\GraphicHeight-30,"v"+VersionNumber
+			Text 20,opt\GraphicHeight-30, "v0.0.2 - Classic Mod        [TEST VERSION]"
 		EndIf
 		UpdateConsole(2)
 		

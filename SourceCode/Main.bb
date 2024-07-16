@@ -1297,6 +1297,8 @@ Function MainLoop()
 			EndIf
 			MouseLook()
 			MovePlayer()
+          UpdateChatSound()
+          UseChatSounds()
 			UpdateNightVision()
 			InFacility = CheckForPlayerInFacility()
 			UpdateDoors()
@@ -1316,6 +1318,7 @@ Function MainLoop()
 					UpdateGuns()
 					AnimateGuns()
 					UpdateIronSight()
+					If g_I\HoldingGun = GUN_P90 Then UpdateScope()
 				EndIf
 				UpdateSPPlayer()
 			Else
@@ -1630,6 +1633,8 @@ Function MainLoop()
 	;Go out of function immediately if the game has been quit
 	If MainMenuOpen Then Return
 	
+	If g_I\HoldingGun = GUN_P90 Then RenderScope()
+	
 	If FPSfactor > 0 And PlayerRoom\RoomTemplate\Name <> "dimension1499" Then RenderSecurityCams()
 	
 	If ShouldUpdateWater<>"" Then
@@ -1682,6 +1687,7 @@ Function MainLoop()
 	
 	DrawQuickLoading()
 	
+	RenderChatSounds()
 	RenderAchievementMsg()
 	RenderSaveMSG()
 	
@@ -3789,7 +3795,7 @@ Function InitNewGame()
 				EndIf
 			Case 3
 				If r\RoomTemplate\Name = "gate_a_entrance"
-					PositionEntity (Collider, EntityX(r\obj), 0.5, EntityZ(r\obj)-1450.0*RoomScale)
+					PositionEntity (Collider, EntityX(r\obj), 0.5, EntityZ(r\obj)-360.0*RoomScale)
 					RotateEntity (Collider,0,r\angle+180,0)
 					PlayerRoom = r
 				EndIf
