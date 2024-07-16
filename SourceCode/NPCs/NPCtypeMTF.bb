@@ -188,7 +188,7 @@ Function UpdateNPCtypeMTF(n.NPCs)
 						n\State = MTF_FLEE
 				End Select
 				If VoiceLine <> "" Then
-					PlayMTFSound(LoadTempSound("SFX\Character\MTF\" + VoiceLine + ".ogg"), n, True)
+					PlayMTFSound(LoadTempSound("SFX\MTF\Player_Normal\" + VoiceLine + ".ogg"), n, True)
 				EndIf
 			EndIf
 		EndIf
@@ -306,7 +306,7 @@ Function UpdateNPCtypeMTF(n.NPCs)
 							Curr173\Idle = SCP173_BOXED
 							EndTask(TASK_CONTAIN173)
 							BeginTask(TASK_173TOCHAMBER)
-							PlayPlayerSPVoiceLine("scp173containmentbox" + Rand(1, 2))
+							PlayPlayerSPVoiceLine("scp173containmentbox" + Rand(1, 3))
 						EndIf
 					Else
 						Local isLooking% = False

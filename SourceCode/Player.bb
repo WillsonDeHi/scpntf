@@ -713,6 +713,8 @@ Function TurnNVOn()
 			CameraFogRange(Camera,CameraFogFar,CameraFogFar)
 		EndIf
 	Else
+		StoredCameraFogFar = CameraFogFar
+		CameraFogFar = 30
 		CameraFogRange(Camera,CameraFogFar,CameraFogFar)
 	EndIf
 	CameraRange(Camera,0.01,GetCameraFogRangeFar(Camera)*2.0)
@@ -732,6 +734,7 @@ Function TurnNVOff()
 			CameraFogRange(Camera,CameraFogNear,CameraFogFar)
 		EndIf
 	Else
+		CameraFogFar = StoredCameraFogFar
 		CameraFogRange(Camera,CameraFogFar,CameraFogFar)
 	EndIf
 	CameraRange(Camera,0.01,GetCameraFogRangeFar(Camera)*2.0)
@@ -940,6 +943,5 @@ End Function
 Include "SourceCode\PlayerAnimations.bb"
 
 ;~IDEal Editor Parameters:
-;~F#2E#5A#70#18B#211#248#252#26D#294#2A4#2BE#2D1#2E4#2EF#2FB#30B#32C#333#340#346
-;~F#353#394
+;~F#2E#5A#70#18B#211#248#252#26D#294#2E7#2F2#2FE
 ;~C#Blitz3D

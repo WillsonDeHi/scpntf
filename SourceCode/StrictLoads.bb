@@ -316,7 +316,7 @@ Function LoadMesh_Strict(File$,parent=0)
 	Local texAlpha% = 0
 	Local bumptex%,temp$
 	Local mat.Materials
-	
+	File = Replace(File,"ninetailedfoxmod\","")
 	DebugLog "Load mesh: "+File
 	
 	If I_Loc\Localized And FileType(I_Loc\LangPath + File$)=1 Then

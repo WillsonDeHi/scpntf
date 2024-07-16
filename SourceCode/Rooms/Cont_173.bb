@@ -99,7 +99,7 @@ Function UpdateEvent_Cont_173(e.Events)
 		Select e\EventState
 			Case 0
 				If Curr173\Idle = SCP173_BOXED And EntityDistanceSquared(Curr173\Collider, e\room\Objects[CONT_173_CHAMBERPIVOT]) < 2.5 Then
-					PlayPlayerSPVoiceLine("scp173contained" + Rand(1, 2))
+					PlayPlayerSPVoiceLine("scp173contained" + Rand(1, 3))
 					Curr173\Idle = SCP173_CONTAINED
 					Contained173 = True
 					e\EventState = 1

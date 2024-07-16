@@ -61,7 +61,7 @@ Type NPCs
 	
 	Field Reload#
 	
-	;Field TargetEnt%
+	Field TargetEnt%
 	
 	Field LastSeen%, LastDist#
 	

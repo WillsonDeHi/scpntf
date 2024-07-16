@@ -398,6 +398,19 @@ Function InitGuns()
 	GunPickPivot = CreatePivot()
 	EntityParent GunPickPivot,g_I\GunPivot
 	
+	ScopeZoom# = 25.0
+	
+	ScopeTexture = CreateTextureUsingCacheSystem(128,128,1)
+	ScopeCam = CreateCamera(g_I\GunPivot)
+	MoveEntity ScopeCam,0,0,0.15
+	CameraZoom ScopeCam,ScopeZoom#
+	CameraViewport ScopeCam,0,0,128,128
+	CameraRange ScopeCam,0.005,16
+	CameraFogMode ScopeCam,1
+	CameraFogRange (ScopeCam, 0.1 * LightVolume, CameraFogFar)
+	CameraFogColor (ScopeCam,255,255,255)
+	HideEntity ScopeCam
+	
 	f = ReadFile("Data\weapons.ini")
 	While Not Eof(f)
 		l = ReadLine(f)
@@ -406,6 +419,7 @@ Function InitGuns()
 			DebugLog l
 			gunID = gunID + 1
 			g.Guns = CreateGun(l,gunID,l+"_viewmodel.b3d","INV"+l+".jpg",False,True)
+			If g\ID = GUN_P90 Then ApplyScopeMaterial(g)
 			If g\ShouldCreateItem Then
 				it = CreateItemTemplate(g\DisplayName,g\name,"GFX\weapons\"+g\name+"_worldmodel.b3d","GFX\weapons\INV"+g\name+".jpg","",GetINIFloat("Data\weapons.ini",g\name,"world scale",0.02))
 				it\isGun% = True
@@ -425,8 +439,8 @@ Function InitGuns()
 	g_I\IronSight% = False
 	g_I\IronSightAnim% = False
 	
-	NVGOnSFX% = LoadSound_Strict("SFX\Guns\NVG_Scope_On.ogg")
-	NVGOffSFX% = LoadSound_Strict("SFX\Guns\NVG_Scope_Off.ogg")
+	NVGOnSFX% = LoadSound_Strict("SFX\Interact\NVGOn.ogg")
+	NVGOffSFX% = LoadSound_Strict("SFX\Interact\NVGOff.ogg")
 	
 	g_I\GunLight = CreateLight(2,g_I\GunPivot)
 	LightColor g_I\GunLight,235,55,0
@@ -1123,449 +1137,6 @@ Function UpdateGuns()
 	EndIf
 	g_I\IronSight = pIronSight
 	
-	;Old singleplayer weapon code (BACKUP)
-	;[Block]
-;	For g = Each Guns
-;		Select g\GunType
-;			Case GUNTYPE_AUTO
-;				;[Block]
-;				If g\ID=g_I\HoldingGun Then
-;					If psp\Ammo[psp\SelectedSlot]=0 Then
-;						If MouseHit1 And (Not MenuOpen) And (Not ConsoleOpen) And SelectedItem = Null Then
-;							PressMouse1=True
-;							PressReload=False
-;						EndIf
-;					Else
-;						If MouseDown1 And (Not MenuOpen) And (Not ConsoleOpen) And SelectedItem = Null Then
-;							PressMouse1=True
-;							PressReload=False
-;						EndIf
-;					EndIf
-;					
-;					If (psp\Ammo[psp\SelectedSlot]=0 And psp\ShootState > 0.0) Lor IsPlayerSprinting Then ;psp\IsPlayerSprinting
-;						PressMouse1=False
-;					EndIf
-;					
-;					If psp\ShootState = 0.0 And PressMouse1 And psp\Ammo[psp\SelectedSlot] > 0 Then
-;						SetAnimTime(g\obj,g\Frame_Idle)
-;					EndIf
-;					
-;					If psp\DeployState < g\Deploy_Time Lor psp\Ammo[psp\SelectedSlot] = g\MaxCurrAmmo Lor psp\ReloadState = 0.0 Then
-;						PressReload=False
-;					EndIf
-;					If psp\ReloadAmmo[psp\SelectedSlot]=0 Then
-;						PressReload=False
-;					EndIf
-;					
-;					If KeyHit(KEY_RELOAD) And (Not MenuOpen) And (Not ConsoleOpen) Then
-;						If psp\ReloadState = 0.0 And psp\Ammo[psp\SelectedSlot] < g\MaxCurrAmmo And (Not g_I\IronSight) Then
-;							PressReload=True
-;						EndIf
-;					EndIf
-;					
-;					shooting = False
-;					If psp\DeployState < g\Deploy_Time Then
-;						ChangeGunFrames(g,g\Anim_Deploy,False)
-;						If prevFrame# < (g\Anim_Deploy\x+1) And AnimTime(g\obj) >= (g\Anim_Deploy\x+1) Then
-;							PlayGunSound(g\name+"\deploy",1,1,False)
-;						EndIf
-;					Else
-;						If psp\ReloadState = 0.0 Then
-;							If psp\ShootState = 0.0 Then
-;								If AnimTime(g\obj) > g\Anim_Shoot\x And AnimTime(g\obj) < g\Anim_Shoot\y-0.5 Then
-;									ChangeGunFrames(g,g\Anim_Shoot,False)
-;								Else
-;									If IsPlayerSprinting Then
-;										PressMouse1 = False
-;										PressReload = False
-;										
-;										If AnimTime(g\obj)<=(g\Anim_Sprint_Transition\y-0.5) Lor AnimTime(g\obj)>(g\Anim_Sprint_Cycle\y) Then
-;											ChangeGunFrames(g,g\Anim_Sprint_Transition,False)
-;										Else
-;											ChangeGunFrames(g,g\Anim_Sprint_Cycle,True)
-;										EndIf
-;									Else
-;										If AnimTime(g\obj)>(g\Anim_Sprint_Transition\x+0.5) And AnimTime(g\obj)<=g\Anim_Sprint_Cycle\y Then
-;											ChangeGunFrames(g,g\Anim_Sprint_Transition,False,True)
-;										Else
-;											SetAnimTime(g\obj,g\Frame_Idle)
-;										EndIf
-;									EndIf
-;								EndIf
-;								
-;								If PressMouse1 And psp\Ammo[psp\SelectedSlot]=0 Then
-;									PlaySound_Strict g_I\ShootEmptySFX
-;								EndIf
-;							Else
-;								ChangeGunFrames(g,g\Anim_Shoot,False)
-;								If Ceil(AnimTime(g\obj)) = g\Anim_Shoot\x Then
-;									PlayGunSound(g\name,g\MaxShootSounds,0,True)
-;									CameraShake = g\Knockback/2.0
-;									user_camera_pitch = user_camera_pitch - g\Knockback
-;									g_I\GunLightTimer = FPSfactor
-;									shooting = True
-;									ShowEntity g\MuzzleFlash
-;									TurnEntity g\MuzzleFlash,0,0,Rnd(360)
-;									ScaleSprite g\MuzzleFlash,Rnd(0.025,0.03),Rnd(0.025,0.03)
-;								EndIf
-;								If psp\ShootState >= g\Rate_Of_Fire-FPSfactor And PressMouse1 Then
-;									SetAnimTime g\obj,g\Anim_Shoot\x
-;								EndIf
-;							EndIf
-;						Else
-;							If AnimTime(g\obj)>g\Anim_Reload\y Lor AnimTime(g\obj)<g\Anim_Reload\x Then
-;								SetAnimTime(g\obj,g\Anim_Reload\x)
-;							EndIf
-;							ChangeGunFrames(g,g\Anim_Reload,False)
-;							If prevFrame# < (g\Anim_Reload\x+1) And AnimTime(g\obj) >= (g\Anim_Reload\x+1) Then
-;								PlayGunSound(g\name+"\reload",g\MaxReloadSounds,1,False)
-;							ElseIf prevFrame# < (g\Anim_Reload\y-0.5) And AnimTime(g\obj) >= (g\Anim_Reload\y-0.5) Then
-;								PressReload = False
-;							EndIf
-;							g_I\IronSight = False
-;						EndIf
-;					EndIf
-;					
-;					If (Not IsPlayerSprinting) And (Not shooting) Then
-;						g_I\GunAnimFLAG = False
-;					Else
-;						g_I\GunAnimFLAG = True
-;					EndIf
-;				EndIf
-;				;[End Block]
-;			Case GUNTYPE_SEMI
-;				;[Block]
-;				;And (Not InLobby())
-;				If g\ID=g_I\HoldingGun Then
-;					If MouseHit1 And (Not MenuOpen) And (Not ConsoleOpen) And SelectedItem = Null Then
-;						PressMouse1=True
-;						PressReload=False
-;					EndIf
-;					
-;					If (psp\Ammo[psp\SelectedSlot]=0 And psp\ShootState > 0.0) Lor IsPlayerSprinting Then
-;						PressMouse1=False
-;					EndIf
-;					
-;					If psp\ShootState = 0.0 And PressMouse1 And psp\Ammo[psp\SelectedSlot] > 0 Then
-;						SetAnimTime(g\obj,g\Frame_Idle)
-;					EndIf
-;					
-;					If psp\DeployState < g\Deploy_Time Lor psp\Ammo[psp\SelectedSlot] = g\MaxCurrAmmo Lor psp\ReloadState = 0.0 Then
-;						PressReload=False
-;					EndIf
-;					If psp\ReloadAmmo[psp\SelectedSlot]=0 Then
-;						PressReload=False
-;					EndIf
-;					
-;					If KeyHit(KEY_RELOAD) And (Not MenuOpen) And (Not ConsoleOpen) Then
-;						If psp\ReloadState = 0.0 And psp\Ammo[psp\SelectedSlot] < g\MaxCurrAmmo And (Not g_I\IronSight) Then
-;							PressReload=True
-;						EndIf
-;					EndIf
-;					
-;					shooting = False
-;					If psp\DeployState < g\Deploy_Time Then
-;						If psp\Ammo[psp\SelectedSlot] = 0 Then
-;							ChangeGunFrames(g,g\Anim_NoAmmo_Deploy,False)
-;						Else
-;							ChangeGunFrames(g,g\Anim_Deploy,False)
-;						EndIf
-;						If prevFrame# < (g\Anim_Deploy\x+1) And AnimTime(g\obj) >= (g\Anim_Deploy\x+1) Then
-;							PlayGunSound(g\name+"\deploy",1,1,False)
-;						EndIf
-;					Else
-;						If psp\ReloadState = 0.0 Then
-;							If psp\ShootState = 0.0 Then
-;								If AnimTime(g\obj) > g\Anim_Shoot\x And AnimTime(g\obj) < g\Anim_Shoot\y-0.5 Then
-;									ChangeGunFrames(g,g\Anim_Shoot,False)
-;								ElseIf AnimTime(g\obj) > g\Anim_NoAmmo_Shoot\x And AnimTime(g\obj) < g\Anim_NoAmmo_Shoot\y-0.5 Then
-;									ChangeGunFrames(g,g\Anim_NoAmmo_Shoot,False)
-;								Else
-;									If IsPlayerSprinting Then
-;										PressMouse1 = False
-;										PressReload = False
-;										
-;										If psp\Ammo[psp\SelectedSlot] = 0 Then
-;											If AnimTime(g\obj)<=(g\Anim_NoAmmo_Sprint_Transition\y-0.5) Lor AnimTime(g\obj)>(g\Anim_NoAmmo_Sprint_Cycle\y) Then
-;												ChangeGunFrames(g,g\Anim_NoAmmo_Sprint_Transition,False)
-;											Else
-;												ChangeGunFrames(g,g\Anim_NoAmmo_Sprint_Cycle,True)
-;											EndIf
-;										Else
-;											If AnimTime(g\obj)<=(g\Anim_Sprint_Transition\y-0.5) Lor AnimTime(g\obj)>(g\Anim_Sprint_Cycle\y) Then
-;												ChangeGunFrames(g,g\Anim_Sprint_Transition,False)
-;											Else
-;												ChangeGunFrames(g,g\Anim_Sprint_Cycle,True)
-;											EndIf
-;										EndIf
-;									Else
-;										If psp\Ammo[psp\SelectedSlot] = 0 Then
-;											If AnimTime(g\obj)>(g\Anim_NoAmmo_Sprint_Transition\x+0.5) And AnimTime(g\obj)<=g\Anim_NoAmmo_Sprint_Cycle\y Then
-;												ChangeGunFrames(g,g\Anim_NoAmmo_Sprint_Transition,False,True)
-;											Else
-;												SetAnimTime(g\obj,g\Frame_NoAmmo_Idle)
-;											EndIf
-;										Else
-;											If AnimTime(g\obj)>(g\Anim_Sprint_Transition\x+0.5) And AnimTime(g\obj)<=g\Anim_Sprint_Cycle\y Then
-;												ChangeGunFrames(g,g\Anim_Sprint_Transition,False,True)
-;											Else
-;												SetAnimTime(g\obj,g\Frame_Idle)
-;											EndIf
-;										EndIf
-;									EndIf
-;								EndIf
-;								
-;								If PressMouse1 And psp\Ammo[psp\SelectedSlot]=0 Then
-;									PlaySound_Strict g_I\ShootEmptySFX
-;								EndIf
-;							Else
-;								If psp\Ammo[psp\SelectedSlot] = 0 Then
-;									ChangeGunFrames(g,g\Anim_NoAmmo_Shoot,False)
-;									If Ceil(AnimTime(g\obj)) = g\Anim_NoAmmo_Shoot\x Then
-;										PlayGunSound("slideback2",1,1,False)
-;										If CameraShake <= (g\Knockback/2)-FPSfactor-0.05 Then
-;											PlayGunSound(g\name,g\MaxShootSounds,0,True)
-;											CameraShake = g\Knockback/2.0
-;											user_camera_pitch = user_camera_pitch - g\Knockback
-;											g_I\GunLightTimer = FPSfactor
-;											ShowEntity g\MuzzleFlash
-;											TurnEntity g\MuzzleFlash,0,0,Rnd(360)
-;											ScaleSprite g\MuzzleFlash,Rnd(0.025,0.03),Rnd(0.025,0.03)
-;										EndIf
-;										shooting = True
-;									EndIf
-;								Else
-;									ChangeGunFrames(g,g\Anim_Shoot,False)
-;									If Ceil(AnimTime(g\obj)) = g\Anim_Shoot\x Then
-;										PlayGunSound(g\name,g\MaxShootSounds,0,True)
-;										CameraShake = g\Knockback/2.0
-;										user_camera_pitch = user_camera_pitch - g\Knockback
-;										g_I\GunLightTimer = FPSfactor
-;										shooting = True
-;										ShowEntity g\MuzzleFlash
-;										TurnEntity g\MuzzleFlash,0,0,Rnd(360)
-;										ScaleSprite g\MuzzleFlash,Rnd(0.025,0.03),Rnd(0.025,0.03)
-;									EndIf
-;								EndIf
-;								If psp\ShootState >= g\Rate_Of_Fire-FPSfactor And PressMouse1 Then
-;									SetAnimTime g\obj,g\Anim_Shoot\x
-;								EndIf
-;							EndIf
-;						Else
-;							If AnimTime(g\obj)>g\Anim_Reload\y Lor AnimTime(g\obj)<g\Anim_Reload\x Then
-;								SetAnimTime(g\obj,g\Anim_Reload\x)
-;							EndIf
-;							ChangeGunFrames(g,g\Anim_Reload,False)
-;							If prevFrame# < (g\Anim_Reload\x+1) And AnimTime(g\obj) >= (g\Anim_Reload\x+1) Then
-;								PlayGunSound(g\name+"\reload",g\MaxReloadSounds,1,False)
-;							ElseIf prevFrame# < (g\Anim_Reload\y-0.5) And AnimTime(g\obj) >= (g\Anim_Reload\y-0.5) Then
-;								PressReload = False
-;							EndIf
-;							g_I\IronSight = False
-;						EndIf
-;					EndIf
-;					
-;					If (Not IsPlayerSprinting) And (Not shooting) Then
-;						g_I\GunAnimFLAG = False
-;					Else
-;						g_I\GunAnimFLAG = True
-;					EndIf
-;				EndIf
-;				;[End Block]
-;			Case GUNTYPE_SHOTGUN
-;				;[Block]
-;				If g\ID=g_I\HoldingGun Then
-;					If MouseHit1 And (Not MenuOpen) And (Not ConsoleOpen) And SelectedItem = Null Then
-;						PressMouse1=True
-;						PressReload=False
-;					EndIf
-;					
-;					If (psp\Ammo[psp\SelectedSlot]=0 And psp\ShootState > 0.0) Lor IsPlayerSprinting Then
-;						PressMouse1=False
-;					EndIf
-;					
-;					If psp\ShootState = 0.0 And PressMouse1 And psp\Ammo[psp\SelectedSlot] > 0 Then
-;						SetAnimTime(g\obj,g\Frame_Idle)
-;					EndIf
-;					
-;					If psp\DeployState < g\Deploy_Time Lor psp\Ammo[psp\SelectedSlot] = g\MaxCurrAmmo Lor psp\ReloadState = 0.0 Then
-;						PressReload=False
-;					EndIf
-;					If psp\ReloadAmmo[psp\SelectedSlot]=0 Then
-;						PressReload=False
-;					EndIf
-;					
-;					If KeyHit(KEY_RELOAD) And (Not MenuOpen) And (Not ConsoleOpen) Then
-;						If psp\ReloadState = 0.0 And psp\Ammo[psp\SelectedSlot] < g\MaxCurrAmmo And (Not g_I\IronSight) Then
-;							PressReload=True
-;						EndIf
-;					EndIf
-;					
-;					shooting = False
-;					If psp\DeployState < g\Deploy_Time Then
-;						ChangeGunFrames(g,g\Anim_Deploy,False)
-;						If prevFrame# < (g\Anim_Deploy\x+1) And AnimTime(g\obj) >= (g\Anim_Deploy\x+1) Then
-;							PlayGunSound(g\name+"\deploy",1,1,False)
-;						EndIf
-;					Else
-;						If psp\ReloadState = 0.0 Then
-;							If psp\ShootState = 0.0 Then
-;								If AnimTime(g\obj) > g\Anim_Shoot\x And AnimTime(g\obj) < g\Anim_Shoot\y-0.5 Then
-;									ChangeGunFrames(g,g\Anim_Shoot,False)
-;								ElseIf AnimTime(g\obj) >= g\Anim_Reload_Stop\x And AnimTime(g\obj) < (g\Anim_Reload_Stop\y-0.5) Then
-;									ChangeGunFrames(g,g\Anim_Reload_Stop,False)
-;									If AnimTime(g\obj) >= (g\Anim_Reload_Stop\y-0.5) Then
-;										SetAnimTime(g\obj,g\Frame_Idle)
-;										PressReload = False
-;									EndIf
-;								Else
-;									If IsPlayerSprinting Then
-;										PressMouse1 = False
-;										PressReload = False
-;										
-;										If AnimTime(g\obj)<=(g\Anim_Sprint_Transition\y-0.5) Lor AnimTime(g\obj)>(g\Anim_Sprint_Cycle\y) Then
-;											ChangeGunFrames(g,g\Anim_Sprint_Transition,False)
-;										Else
-;											ChangeGunFrames(g,g\Anim_Sprint_Cycle,True)
-;										EndIf
-;									Else
-;										If AnimTime(g\obj)>(g\Anim_Sprint_Transition\x+0.5) And AnimTime(g\obj)<=g\Anim_Sprint_Cycle\y Then
-;											ChangeGunFrames(g,g\Anim_Sprint_Transition,False,True)
-;										Else
-;											SetAnimTime(g\obj,g\Frame_Idle)
-;										EndIf
-;									EndIf
-;								EndIf
-;								
-;								If PressMouse1 And psp\Ammo[psp\SelectedSlot]=0 Then
-;									PlaySound_Strict g_I\ShootEmptySFX
-;								EndIf
-;							Else
-;								ChangeGunFrames(g,g\Anim_Shoot,False)
-;								If Ceil(AnimTime(g\obj)) = g\Anim_Shoot\x Then
-;									PlayGunSound(g\name,g\MaxShootSounds,0,True)
-;									CameraShake = g\Knockback/2.0
-;									user_camera_pitch = user_camera_pitch - g\Knockback
-;									g_I\GunLightTimer = FPSfactor
-;									shooting = True
-;									ShowEntity g\MuzzleFlash
-;									TurnEntity g\MuzzleFlash,0,0,Rnd(360)
-;									ScaleSprite g\MuzzleFlash,Rnd(0.025,0.03),Rnd(0.025,0.03)
-;								EndIf
-;								If psp\ShootState >= g\Rate_Of_Fire-FPSfactor And PressMouse1 Then
-;									SetAnimTime g\obj,g\Anim_Shoot\x
-;								EndIf
-;							EndIf
-;						Else
-;							If AnimTime(g\obj)>g\Anim_Reload_Stop\y Lor AnimTime(g\obj)<g\Anim_Reload_Start\x Then
-;								SetAnimTime(g\obj,g\Anim_Reload_Start\x)
-;							EndIf
-;							If AnimTime(g\obj) >= g\Anim_Reload_Start\x And AnimTime(g\obj) < (g\Anim_Reload_Start\y-0.5) Then
-;								ChangeGunFrames(g,g\Anim_Reload_Start,False)
-;								If AnimTime(g\obj) >= (g\Anim_Reload_Start\y-0.5) Then
-;									SetAnimTime(g\obj,g\Anim_Reload\x)
-;									PlayGunSound(g\name+"\reload",g\MaxReloadSounds,1,False)
-;								EndIf
-;							ElseIf AnimTime(g\obj) >= g\Anim_Reload\x And AnimTime(g\obj) < (g\Anim_Reload\y-0.5) Then
-;								ChangeGunFrames(g,g\Anim_Reload,False)
-;								If AnimTime(g\obj) >= (g\Anim_Reload\y-0.5) Then
-;									If psp\Ammo[psp\SelectedSlot]<g\MaxCurrAmmo And psp\ReloadAmmo[psp\SelectedSlot]>0 Then
-;										SetAnimTime(g\obj,g\Anim_Reload\x)
-;										PlayGunSound(g\name+"\reload",g\MaxReloadSounds,1,False)
-;									Else
-;										SetAnimTime(g\obj,g\Anim_Reload_Stop\x)
-;										PlayGunSound(g\name+"\reload_stop",1,1,False)
-;									EndIf
-;								EndIf
-;							ElseIf AnimTime(g\obj) >= g\Anim_Reload_Stop\x And AnimTime(g\obj) < (g\Anim_Reload_Stop\y-0.5) Then
-;								ChangeGunFrames(g,g\Anim_Reload_Stop,False)
-;								If AnimTime(g\obj) >= (g\Anim_Reload_Stop\y-0.5) Then
-;									SetAnimTime(g\obj,g\Frame_Idle)
-;									PressReload = False
-;								EndIf
-;							EndIf
-;							g_I\IronSight = False
-;						EndIf
-;					EndIf
-;					
-;					If (Not IsPlayerSprinting) And (Not shooting) Then
-;						g_I\GunAnimFLAG = False
-;					Else
-;						g_I\GunAnimFLAG = True
-;					EndIf
-;				EndIf
-;				;[End Block]
-;			Case GUNTYPE_MELEE
-;				;[Block]
-;				If g\ID=g_I\HoldingGun Then
-;					If MouseDown1 And (Not MenuOpen) And (Not ConsoleOpen) And SelectedItem = Null Then
-;						PressMouse1=True
-;					EndIf
-;					
-;					If psp\ShootState > 0.0 Lor psp\IsPlayerSprinting Then
-;						PressMouse1=False
-;					EndIf
-;					
-;					If psp\ShootState = 0.0 And PressMouse1 Then
-;						SetAnimTime(g\obj,g\Frame_Idle)
-;					EndIf
-;					
-;					shooting = False
-;					If psp\DeployState < g\Deploy_Time Then
-;						ChangeGunFrames(g,g\Anim_Deploy,False)
-;						If prevFrame# < (g\Anim_Deploy\x+1) And AnimTime(g\obj) >= (g\Anim_Deploy\x+1) Then
-;							PlayGunSound(g\name+"\deploy",1,1,False)
-;						EndIf
-;					Else
-;						If psp\ShootState = 0.0 Then
-;							If AnimTime(g\obj) > g\Anim_Shoot\x And AnimTime(g\obj) < g\Anim_Shoot\y-0.5 Then
-;								ChangeGunFrames(g,g\Anim_Shoot,False)
-;							Else
-;								If psp\IsPlayerSprinting Then
-;									psp\PressMouse1 = False
-;									psp\PressReload = False
-;									
-;									If AnimTime(g\obj)<=(g\Anim_Sprint_Transition\y-0.5) Lor AnimTime(g\obj)>(g\Anim_Sprint_Cycle\y) Then
-;										ChangeGunFrames(g,g\Anim_Sprint_Transition,False)
-;									Else
-;										ChangeGunFrames(g,g\Anim_Sprint_Cycle,True)
-;									EndIf
-;								Else
-;									If AnimTime(g\obj)>(g\Anim_Sprint_Transition\x+0.5) And AnimTime(g\obj)<=g\Anim_Sprint_Cycle\y Then
-;										ChangeGunFrames(g,g\Anim_Sprint_Transition,False,True)
-;									Else
-;										SetAnimTime(g\obj,g\Frame_Idle)
-;									EndIf
-;								EndIf
-;							EndIf
-;							psp\ReloadState = 0.0
-;						Else
-;							ChangeGunFrames(g,g\Anim_Shoot,False)
-;							If Ceil(AnimTime(g\obj)) = g\Anim_Shoot\x Then
-;								PlayGunSound(g\name+"\miss",1,1,True)
-;							EndIf
-;							
-;							If psp\ShootState >= g\ShootDelay And psp\ReloadState = 0.0 Then
-;								psp\ReloadState = 1.0
-;							EndIf
-;							If psp\ShootState >= g\Rate_Of_Fire-FPSfactor And PressMouse1 Then
-;								SetAnimTime g\obj,g\Anim_Shoot\x
-;								psp\ReloadState = 0.0
-;							EndIf
-;						EndIf
-;					EndIf
-;					
-;					If (Not psp\IsPlayerSprinting) And (Not shooting) Then
-;						g_I\GunAnimFLAG = False
-;					Else
-;						g_I\GunAnimFLAG = True
-;					EndIf
-;				EndIf
-;				;[End Block]
-;		End Select
-;	Next
-	;[End Block]
-	
 End Function
 
 Function ToggleGuns()
@@ -2025,89 +1596,113 @@ Function ShootGun(g.Guns)
 	
 End Function
 
-;Unused
-;[Block]
-;Function UpdateScope()
-;	
-;	If FPSfactor > 0.0
-;		If MouseHit3
-;			ScopeNVG = Not ScopeNVG
-;			If ScopeNVG
-;				PlaySound_Strict NVGOnSFX
-;			Else
-;				PlaySound_Strict NVGOffSFX
-;			EndIf
-;		EndIf
-;	EndIf
-;	
-;End Function
-;
-;Function RenderScope()
-;	Local n.NPCs
-;	
-;	If NTF_GameModeFlag<>3
-;		If PlayerRoom\RoomTemplate\Name$ = "gate_a_topside" Then
-;			CameraFogRange ScopeCam, 5,30
-;			CameraFogColor (ScopeCam,200,200,200)
-;			CameraClsColor (ScopeCam,200,200,200)
-;			CameraRange(ScopeCam, 0.005, 30)
-;		ElseIf (PlayerRoom\RoomTemplate\Name = "gate_a_intro") Then
-;			CameraFogRange ScopeCam, 5,30
-;			CameraFogColor (ScopeCam,200,200,200)
-;			CameraClsColor (ScopeCam,200,200,200)					
-;			CameraRange(ScopeCam, 0.005, 100)
-;		ElseIf (PlayerRoom\RoomTemplate\Name = "gate_b_topside") Then
-;			CameraFogRange ScopeCam, 5,45
-;			CameraFogColor (ScopeCam,200,200,200)
-;			CameraClsColor (ScopeCam,200,200,200)					
-;			CameraRange(ScopeCam, 0.005, 60)
-;		ElseIf (PlayerRoom\RoomTemplate\Name = "room2_maintenance") And (EntityY(Collider)<-3500.0*RoomScale) Then
-;			CameraFogRange ScopeCam,1,6
-;			CameraFogColor ScopeCam,5,20,3
-;			CameraClsColor ScopeCam,5,20,3
-;			CameraRange ScopeCam,0.01,7
-;		Else
-;			If (Not ScopeNVG)
-;				CameraFogRange(ScopeCam, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
-;				CameraRange(ScopeCam, 0.005, Min(CameraFogFar*LightVolume*1.5,32))
-;			Else
-;				CameraFogRange(ScopeCam, CameraFogNear*LightVolume,30*LightVolume)
-;				CameraRange(ScopeCam, 0.005, Min(30*LightVolume*1.5,32))
-;			EndIf
-;			CameraFogColor(ScopeCam, 0,0,0)
-;			CameraClsColor ScopeCam,0,0,0
-;			CameraFogMode ScopeCam,1
-;		EndIf
-;	Else
-;		If (Not ScopeNVG)
-;			;CameraFogRange(ScopeCam, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
-;			;CameraRange(ScopeCam, 0.005, Min(CameraFogFar*LightVolume*1.5,32))
-;		Else
-;			;CameraFogRange(ScopeCam, CameraFogNear*LightVolume,30*LightVolume)
-;			;CameraRange(ScopeCam, 0.005, Min(30*LightVolume*1.5,32))
-;		EndIf
-;		CameraFogColor(ScopeCam, 0,0,0)
-;		CameraFogMode ScopeCam,1
-;	EndIf
-;	
-;	HideEntity Camera
-;	ShowEntity ScopeCam
-;	Cls
-;	SetBuffer BackBuffer()
-;	If ScopeNVG
-;		For n = Each NPCs
-;			If n\NPCtype = NPCtype966
-;				ShowEntity n\obj
-;			EndIf
-;		Next
-;	EndIf
-;	RenderWorld
-;	CopyRect 0,0,128,128,0,0,BackBuffer(),TextureBuffer(ScopeTexture)
-;	ShowEntity Camera
-;	HideEntity ScopeCam
-;	
-;End Function
-;[End Block]
+Function ApplyScopeMaterial(g.Guns)
+	CatchErrors("ApplyAttachmentMaterial")
+	
+	Local temp#
+	Local i%, j%, sf%, b%, t1%, name$
+	
+	For i = 1 To CountSurfaces(g\obj)
+		sf = GetSurface(g\obj,i)
+		b = GetSurfaceBrush(sf)
+		If b<>0 Then
+			For j = 0 To 7
+				t1 = GetBrushTexture(b,j)
+				If t1<>0 Then
+					name$ = StripPath(TextureName(t1))
+					If Left(Lower(name),9) = "p90_scope" Then
+						BrushTexture b, ScopeTexture, 0, j
+						PaintSurface sf,b
+						DeleteSingleTextureEntryFromCache t1
+						Exit
+					EndIf
+					If name<>"" Then DeleteSingleTextureEntryFromCache t1
+				EndIf
+			Next
+			FreeBrush b
+		EndIf
+	Next
+	
+	CatchErrors("Uncaught (ApplyAttachmentMaterial)")
+End Function
+
+Function UpdateScope()
+	
+	If FPSfactor > 0.0
+		If MouseHit3
+			ScopeNVG = Not ScopeNVG
+			If ScopeNVG
+				PlaySound_Strict NVGOnSFX
+			Else
+				PlaySound_Strict NVGOffSFX
+			EndIf
+		EndIf
+	EndIf
+	
+End Function
+
+Function RenderScope()
+	Local n.NPCs
+	
+	If gopt\GameMode <> GAMEMODE_MULTIPLAYER Then
+		If (Not ScopeNVG) Then
+			CameraFogRange(ScopeCam, 0.1 * LightVolume*LightVolume,CameraFogFar*LightVolume)
+			CameraRange(ScopeCam, 0.005, Min(CameraFogFar*LightVolume*1.5,32))
+		Else
+			CameraFogRange(ScopeCam, 0.1 * LightVolume*LightVolume,30*LightVolume)
+			CameraRange(ScopeCam, 0.005, Min(30*LightVolume*1.5,32))
+		EndIf
+	Else
+		If (Not ScopeNVG) Then
+			CameraFogRange(ScopeCam,0.1 * LightVolume,CameraFogFar*3)
+		Else
+			CameraFogRange(ScopeCam,CameraFogFar*2,CameraFogFar*3)
+		EndIf
+	EndIf
+	
+	CameraFogColor(ScopeCam, 0,0,0)
+	CameraClsColor ScopeCam,0,0,0
+	CameraFogMode ScopeCam,1
+	
+	ShowEntity ScopeCam
+	HideEntity Camera
+	
+	If gopt\GameMode <> GAMEMODE_MULTIPLAYER Then
+		Cls
+	EndIf
+	
+	SetBuffer BackBuffer()
+	
+	If gopt\GameMode <> GAMEMODE_MULTIPLAYER Then
+		If ScopeNVG
+			For n = Each NPCs
+				If n\NPCtype = NPCtype966
+					ShowEntity n\obj
+				EndIf
+			Next
+		EndIf
+	EndIf
+	
+	RenderWorld
+	
+	CopyRect 0,0,128,128,0,0,BackBuffer(),TextureBuffer(ScopeTexture)
+	
+	ShowEntity Camera
+	HideEntity ScopeCam
+	
+	If gopt\GameMode <> GAMEMODE_MULTIPLAYER Then
+		If (Not WearingNightVision) Then
+			If ScopeNVG
+				For n = Each NPCs
+					If n\NPCtype = NPCtype966
+						HideEntity n\obj
+					EndIf
+				Next
+			EndIf
+		EndIf
+	EndIf
+	
+End Function
 
 Function PlayGunSound(name$,max_amount%=1,sfx%=0,pitchshift%=False,custom%=False)
 	Local g.Guns, gun.Guns
