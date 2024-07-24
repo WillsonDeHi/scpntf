@@ -471,58 +471,58 @@ Function GetPlayerVoiceLine$(voiceLine%, voiceLineNumber%, playerID%=-1)
 	
 	voice = voice + voiceLineNumber + ".ogg"
 	
-;	If NTF_GameModeFlag=3 Then
-;		
-;	Else
-;		voice = "SFX\Player\Voice\"
-;		
-;		Select voiceLine
-;			Case COMMAND_MEDICAL
-;				voice = voice + "Playerneedsmedicalattention" + Rand(1, 2) + ".ogg"
-;			Case COMMAND_ENEMYSPOTTED
-;				For n = Each NPCs
-;					If n<>Null Then
-;						If EntityDistanceSquared(Collider, n\Collider) < PowTwo(7) Then
-;							If EntityVisible(Collider, n\Collider) Then
-;								Select n\NPCtype
-;									Case NPCtypeD2
-;										voice = voice + "Class-D Spotted STOP" + Rand(1, 3) + ".ogg"
-;									Case NPCtypeZombie
-;										voice = voice + "SCP-049-2Spotted" + Rand(1, 2) + ".ogg"
-;									Case NPCtype173
-;										voice = voice + "SCP-173Spotted" + Rand(1, 3) + ".ogg"
-;									Case NPCtypeOldMan
-;										voice = voice + "SCP-106Spotted" + Rand(1, 3) + ".ogg"
-;									Case NPCtype049
-;										voice = voice + "SCP-049Spotted" + Rand(1, 3) + ".ogg"
-;									Case NPCtype096
-;										voice = voice + "SCP-096Spotted" + Rand(1, 3) + ".ogg"
-;								End Select
-;							Else
-;								If n\NPCtype = NPCtypeD2 Then
-;									voice = voice + "Class-D Detected" + Rand(1, 2) + ".ogg"
-;								EndIf
-;								Exit
-;							EndIf
-;						EndIf
-;					EndIf
-;				Next
-;			Case COMMAND_ENEMYLOST
-;				;voice = voice + 
-;			Case COMMAND_TESLA
-;				voice = voice + "TeslaGateDeactivation" + Rand(1, 2) + ".ogg"
-;			Case COMMAND_CAMERA
-;				;voice = voice + 
-;			Case COMMAND_SPLIT
-;				voice = voice + "StopFollowingtoTeam" + Rand(1, 4) + ".ogg"
-;			Case COMMAND_SCP
-;				If Contained106 Then
-;					voice = voice + "SCP-106 Contained.ogg"
-;				ElseIf Curr173\Idle = SCP173_CONTAIN Then
-;					voice = voice + "scp173containmentbox"+Rand(1, 2)+".ogg"
-;				EndIf
-;		End Select
-;	EndIf
+	If NTF_GameModeFlag=3 Then
+		
+	Else
+		voice = "SFX\Player\Voice\"
+		
+		Select voiceLine
+			Case COMMAND_MEDICAL
+				voice = voice + "Playerneedsmedicalattention" + Rand(1, 2) + ".ogg"
+			Case COMMAND_ENEMYSPOTTED
+				For n = Each NPCs
+					If n<>Null Then
+						If EntityDistanceSquared(Collider, n\Collider) < PowTwo(7) Then
+							If EntityVisible(Collider, n\Collider) Then
+								Select n\NPCtype
+									Case NPCtypeD2
+										voice = voice + "Class-D Spotted STOP" + Rand(1, 3) + ".ogg"
+									Case NPCtypeZombie
+										voice = voice + "SCP-049-2Spotted" + Rand(1, 2) + ".ogg"
+									Case NPCtype173
+										voice = voice + "SCP-173Spotted" + Rand(1, 3) + ".ogg"
+									Case NPCtypeOldMan
+										voice = voice + "SCP-106Spotted" + Rand(1, 3) + ".ogg"
+									Case NPCtype049
+										voice = voice + "SCP-049Spotted" + Rand(1, 3) + ".ogg"
+									Case NPCtype096
+										voice = voice + "SCP-096Spotted" + Rand(1, 3) + ".ogg"
+								End Select
+							Else
+								If n\NPCtype = NPCtypeD2 Then
+									voice = voice + "Class-D Detected" + Rand(1, 2) + ".ogg"
+								EndIf
+								Exit
+							EndIf
+						EndIf
+					EndIf
+				Next
+			Case COMMAND_ENEMYLOST
+					;voice = voice + 
+			Case COMMAND_TESLA
+				voice = voice + "TeslaGateDeactivation" + Rand(1, 2) + ".ogg"
+			Case COMMAND_CAMERA
+					;voice = voice + 
+			Case COMMAND_SPLIT
+				voice = voice + "StopFollowingtoTeam" + Rand(1, 4) + ".ogg"
+			Case COMMAND_SCP
+				If Contained106 Then
+					voice = voice + "SCP-106 Contained.ogg"
+				ElseIf Curr173\Idle = SCP173_CONTAIN Then
+					voice = voice + "scp173containmentbox" + Rand(1, 2)+".ogg"
+				EndIf
+		End Select
+	EndIf
 	
 	Return voice
 End Function
@@ -804,7 +804,7 @@ Function UpdateSPPlayer()
 		
 		If contain173 Then
 			If (BlinkTimer <= -6 And (BlinkTimer + FPSfactor) > -6) Then
-				PlayPlayerSPVoiceLine("Blinking" + Rand(1, 2))
+				PlayPlayerSPVoiceLine("Blinking" + Rand(1, 3))
 			EndIf
 		Else
 			Curr173\Idle = SCP173_ACTIVE
@@ -941,7 +941,6 @@ End Function
 
 ;Inlcuding the PlayerAnimations file
 Include "SourceCode\PlayerAnimations.bb"
-
 ;~IDEal Editor Parameters:
-;~F#2E#5A#70#18B#211#248#252#26D#294#2E7#2F2#2FE
+;~F#2E#70#211#248#252#26D#294
 ;~C#Blitz3D

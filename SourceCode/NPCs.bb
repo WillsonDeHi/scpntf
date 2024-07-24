@@ -4524,5 +4524,5 @@ Function FindNPCAnimation.Vector3D(NPCtype%, AnimName$)
 End Function
 
 ;~IDEal Editor Parameters:
-;~F#29#276#2B1#360#39C#42D#4A4#5FB#6AE#78F#858#85C#8C0
+;~F#276#2B1#360#39C#42D#4A4#5FB#6AE#78F#858#85C#8C0
 ;~C#Blitz3D

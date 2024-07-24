@@ -1681,7 +1681,7 @@ Function UpdateGUI()
 							HealSPPlayer(80)
 							BlurTimer = 500
 							GiveAchievement(Achv420)
-							PlaySound_Strict LoadTempSound("SFX\Music\420J.ogg")
+							PlaySound_Strict LoadTempSound("SFX\Music\420J"+Rand(1,3)+".ogg")
 						EndIf
 						MsgTimer = 70 * 5
 						RemoveItem(SelectedItem)
@@ -3215,91 +3215,264 @@ Function DrawGUI()
 End Function
 
 Function DrawGunsInHUD()
-	Local isMultiplayer% = (gopt\GameMode = GAMEMODE_MULTIPLAYER)
+		DebugLog "HoldingGun = "+HoldingGun	If (Not NTF_DisableAimCross%)
+		MidHandle AimCrossIMG
+		DrawImage AimCrossIMG,opt\GraphicWidth/2,opt\GraphicHeight/2
+	EndIf
 	Local g.Guns
-	Local x# = 50, x2# = 150
-	Local y# = 50
-	Local width#=64,height#=64
+	Local width% = 204, height% = 20
 	
-	Local width2%
-	Local i%
-	width# = 204
-	height# = 20
-	
-	x# = opt\GraphicWidth - 60
-	y# = opt\GraphicHeight - 55
-	
-	Local pAmmo%, pReloadAmmo%
-	If isMultiplayer Then
-		pAmmo = Players[mp_I\PlayerID]\Ammo[Players[mp_I\PlayerID]\SelectedSlot]
-		pReloadAmmo = Players[mp_I\PlayerID]\ReloadAmmo[Players[mp_I\PlayerID]\SelectedSlot]
-	Else
-		For g = Each Guns
-			If g\ID = g_I\HoldingGun Then
-				pAmmo = g\CurrAmmo
-				pReloadAmmo = g\CurrReloadAmmo
+	If HoldingGun = 1 Lor True
+		
+		x% = GraphicWidth - 300
+		y% = GraphicHeight - 95
+		
+		Color 155,155,155
+		Rect(x + 123, y, width - 123, height, True)
+		
+		Color 255,255,255
+		Rect(x, y, width, height, False)
+		
+		Color 0,0,0
+		Rect(x - 50, y, 30, 30)
+		
+		Color 255, 255, 255
+		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
+		DrawImage BulletIcon, x - 50, y
+		For g.Guns = Each Guns
+			If g\ID = 1
+				For i = 1 To g\CurrAmmo
+					DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
+				Next
+				SetFont fo\ConsoleFont
+				Text x+220,y,"/"+USPAmmo%
 			EndIf
 		Next
+		
+		If (Not NTF_DisableAimCross%)
+			MidHandle AimCrossIMG
+			DrawImage AimCrossIMG,opt\GraphicWidth/2,opt\GraphicHeight/2
+		EndIf
+		
+			;Text x+200,y,
+	ElseIf HoldingGun = 2
+		
+		x% = GraphicWidth - 300
+		y% = GraphicHeight - 95
+		
+			;Color 155,155,155
+			;Rect(x + 123, y, width - 123, height, True)
+		
+		Color 255,255,255
+		Rect(x, y, width, height, False)
+		
+		Color 0,0,0
+		Rect(x - 50, y, 30, 30)
+		
+		Color 255, 255, 255
+		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
+		DrawImage BulletIcon, x - 50, y
+		For g.Guns = Each Guns
+			If g\ID = 2
+				For i = 1 To g\CurrAmmo
+					DrawImage(P90BulletMeter, x + 3 + 3.98 * (i - 1), y + 3) ;x + 3 + 10 * (i - 1)
+				Next
+				SetFont Font3%
+				Text x+220,y,"/"+P90Ammo%
+			EndIf
+		Next
+		
+		If (Not NTF_DisableAimCross%)
+			MidHandle AimCrossIMG
+			DrawImage AimCrossIMG,opt\GraphicWidth/2,opt\GraphicHeight/2
+		EndIf
+		
+	ElseIf HoldingGun = 3
+		If (Not NTF_DisableAimCross%)
+			MidHandle AimCrossIMG
+			DrawImage AimCrossIMG,opt\GraphicWidth/2,opt\GraphicHeight/2
+		EndIf
+	ElseIf HoldingGun = 4
+		
+		x% = GraphicWidth - 300
+		y% = GraphicHeight - 95
+		
+		Color 155,155,155
+		Rect(x + 123, y, width - 123, height, True)
+		
+		Color 255,255,255
+		Rect(x, y, width, height, False)
+		
+		Color 0,0,0
+		Rect(x - 50, y, 30, 30)
+		
+		Color 255, 255, 255
+		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
+		DrawImage BulletIcon, x - 50, y
+		For g.Guns = Each Guns
+			If g\ID = 4
+				For i = 1 To g\CurrAmmo
+					DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
+				Next
+				SetFont Font3%
+				Text x+220,y,"/"+M9Ammo%
+			EndIf
+		Next
+		
+		If (Not NTF_DisableAimCross%)
+			MidHandle AimCrossIMG
+			DrawImage AimCrossIMG,opt\GraphicWidth/2,opt\GraphicHeight/2
+		EndIf
 	EndIf
 	
-	For g = Each Guns
-		If g\ID = g_I\HoldingGun Then
-			If (g\GunType <> GUNTYPE_MELEE) Then
-				If pAmmo > 0 Then
-					Color 255,255,255
-				Else
-					Color 255,0,0
-				EndIf
-				Rect(x - 50 - 1 - 30, y - 1, 30 + 2, 30 + 2, False)
-				DrawImage BulletIcon, x - 50 - 30, y
+	Color 200,20,20
+	For g.Guns = Each Guns
+		Select Weapon_InSlot1$
+			Case "p90"
+				x% = GraphicWidth - 150
+				y% = (GraphicHeight/2) - 150
+				width% = 64
+				height% = 64
 				
-				SetFont fo\Font%[Font_Digital_Medium]
-				If pAmmo > g\MaxCurrAmmo/5
-					Color 0,255,0
-				Else
-					Color 255,0,0
+				If g\ID% = 2
+					Color 0,0,0
+					Rect x%,y%,ImageWidth(g\IMG),ImageHeight(g\IMG)
+					DrawImage g\IMG,x%,y%
+					Color 200,20,20
 				EndIf
-				TextWithAlign x, y + 5, pAmmo, 2
-				Color 0,255,0
-				Text x, y + 5, "/"
-				width2% = StringWidth("/")
-				If pReloadAmmo > 0
-					Color 0,255,0
-				Else
-					Color 255,0,0
+				
+				If Weapon_CurrSlot%=1
+					Rect(x, y, width, height,False)
 				EndIf
-				Text x + width2, y + 5, pReloadAmmo
-			EndIf
-			Exit
+		End Select
+		Select Weapon_InSlot2$
+			Case "usp"
+				x% = GraphicWidth - 150
+				y% = (GraphicHeight/2) - 50
+				width% = 64
+				height% = 64
+				
+				If g\ID% = 1
+					Color 0,0,0
+					Rect x%,y%,ImageWidth(g\IMG),ImageHeight(g\IMG)
+					DrawImage g\IMG,x%,y%
+					Color 200,20,20
+				EndIf
+				
+				If Weapon_CurrSlot%=2
+					Rect(x, y, width, height,False)
+				EndIf
+			Case "m9"
+				x% = GraphicWidth - 150
+				y% = (GraphicHeight/2) - 50
+				width% = 64
+				height% = 64
+				
+				If g\ID% = 4
+					Color 0,0,0
+					Rect x%,y%,ImageWidth(g\IMG),ImageHeight(g\IMG)
+					DrawImage g\IMG,x%,y%
+					Color 200,20,20
+				EndIf
+				
+				If Weapon_CurrSlot%=2
+					Rect(x, y, width, height,False)
+				EndIf
+		End Select
+		Select Weapon_InSlot3$
+			Case "crowbar"
+				x% = GraphicWidth - 150
+				y% = (GraphicHeight/2) + 50
+				width% = 64
+				height% = 64
+				
+				If g\ID% = 3
+					Color 0,0,0
+					Rect x%,y%,ImageWidth(g\IMG),ImageHeight(g\IMG)
+					DrawImage g\IMG,x%,y%
+					Color 200,20,20
+				EndIf
+				
+				If Weapon_CurrSlot%=3
+					Rect(x, y, width, height,False)
+				EndIf
+		End Select
+		x% = GraphicWidth - 150
+		y% = (GraphicHeight/2) + 150
+		width% = 64
+		height% = 64
+		Color 0,0,0
+		Rect x%,y%,width%,height%
+		Color 200,20,20
+		If Weapon_CurrSlot%=4
+			Rect(x, y, width, height, False)
 		EndIf
 	Next
 	
-	Color 255,255,255
+	If KillTimer >= 0 And (CanPlayerUseGuns%=True) And FPSFactor#>0.0
+		If KeyHit(47)
+			GunChangeFLAG = False
+			Weapon_CurrSlot% = Weapon_CurrSlot% + 1
+			If Weapon_CurrSlot%>4 Then Weapon_CurrSlot%=1
+			Select Weapon_CurrSlot%
+				Case 1
+					Select Weapon_InSlot1$
+						Case "p90"
+							HoldingGun=2
+					End Select
+				Case 2
+					Select Weapon_InSlot2$
+						Case "usp"
+							HoldingGun=1
+						Case "m9"
+							HoldingGun=4
+					End Select
+				Case 3
+					Select Weapon_InSlot3$
+						Case "crowbar"
+							HoldingGun=3
+					End Select
+				Case 4
+					HoldingGun = 0
+			End Select
+		EndIf
+	EndIf
 	
-	x = 55
-	y = 55
-	width = 64
-	height = 64
-	If mpl\SlotsDisplayTimer > 0.0 Then
-		For i = 0 To MaxGunSlots-1
-			DrawFrame((x-3)+(128*i),y-3,width+6,height+6)
-			If g_I\Weapon_CurrSlot = (i + 1) Then
-				Color 0,255,0
-				Rect (x-3)+(128*i),y-3,width+6,height+6,True
-			EndIf
-			If g_I\Weapon_InSlot[i] <> "" Then
-				For g = Each Guns
-					If g\name = g_I\Weapon_InSlot[i] Then
-						DrawImage g\IMG,x+(128*i),y
-						Color 255,255,255
-						If g_I\Weapon_CurrSlot = (i + 1) Then
-							SetFont fo\Font[Font_Default]
-							Text(x+(width/2)+(128*i),y+height+10,g\DisplayName,True,False)
-						EndIf
-						Exit
-					EndIf
-				Next
-			EndIf
+	x% = GraphicWidth - 300
+	y% = GraphicHeight - 55
+	width% = 204
+	height% = 20
+	
+		;Color 155,155,155
+		;Rect(x + 123, y, width - 123, height, True)
+	
+	If Kevlar_Health%>0
+		Color 255,255,255
+	Else
+		Color 255,0,0
+	EndIf
+	Rect(x, y, width, height, False)
+	
+	Color 0,0,0
+	Rect(x - 50, y, 30, 30)
+	
+	If Kevlar_Health%>20
+		Color 255, 255, 255
+	Else
+		Color 255,0,0
+	EndIf
+	Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
+	DrawImage KevlarIcon, x - 50, y
+	For i = 1 To Int(Kevlar_Health%/5)
+		DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
+	Next
+	
+	If Kevlar_ExtraHealth%>0
+		Color 255,255,0
+		Rect(x, y+height+5, (width/2)+2, height, False)
+		
+		For i = 1 To Int(Kevlar_ExtraHealth%/5)
+			DrawImage(ExtraKevlarIMG, x + 3 + 10 * (i - 1), (y+height+5) + 3)
 		Next
 	EndIf
 	

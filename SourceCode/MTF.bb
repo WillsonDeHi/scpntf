@@ -378,6 +378,7 @@ Function UseChatSounds()
 		For np.NPCs = Each NPCs
 			dist = EntityDistance(np\Collider,Collider)
 			If dist < 10.0
+				Local skip%
 				If np\NPCtype = NPCtype173
 					If KeyHit(2)
 						PlayChatSound("173spotted1")
@@ -414,40 +415,40 @@ Function UseChatSounds()
 					If KeyHit(9)
 						If Contain173State% = 4
 							PlayChatSound("173cont",2,3)
-							ChatSFXOpenedTimer# = 500.0
+							ChatSFXOpenedTimer# = 500.0							skip = True
 						EndIf
-					EndIf
-				ElseIf np\NPCtype = NPCtype106
+					EndIf				EndIf
+				If np\NPCtype = NPCtype106 And skip = False Then
 					If KeyHit(2)
 						PlayChatSound("106spotted",1,3)
-						ChatSFXOpenedTimer# = 500.0
-					EndIf
-				ElseIf np\NPCtype = NPCtype096
+						ChatSFXOpenedTimer# = 500.0						skip = True
+					EndIf				EndIf
+				If np\NPCtype = NPCtype096 And skip = False Then
 					If KeyHit(2)
 						PlayChatSound("096spotted")
-						ChatSFXOpenedTimer# = 500.0
-					EndIf
-				ElseIf np\NPCtype = NPCtypeZombie
+						ChatSFXOpenedTimer# = 500.0						skip = True
+					EndIf				EndIf
+				If np\NPCtype = NPCtypeZombie And skip = False Then
 					If KeyHit(2)
 						PlayChatSound("0491")
-						ChatSFXOpenedTimer# = 500.0
+						ChatSFXOpenedTimer# = 500.0						skip = True
 					EndIf
 					If KeyHit(7)
 						PlayChatSound("0492")
-						ChatSFXOpenedTimer# = 500.0
-					EndIf
-				ElseIf np\NPCtype = NPCtypeD2
+						ChatSFXOpenedTimer# = 500.0						skip = True
+					EndIf				EndIf
+				If np\NPCtype = NPCtypeD2 And skip = False Then
 					If KeyHit(2)
 						PlayChatSound("thereheis",1,3)
-						ChatSFXOpenedTimer# = 500.0
+						ChatSFXOpenedTimer# = 500.0						skip = True
 					EndIf
 					If KeyHit(3)
 						PlayChatSound("stop",0,2)
-						ChatSFXOpenedTimer# = 500.0
+						ChatSFXOpenedTimer# = 500.0						skip = True
 					EndIf
 					If KeyHit(7)
-						PlayChatSound("targetterminated",1,3)
-						ChatSFXOpenedTimer# = 500.0
+						PlayChatSound("targetterminated",1,2)
+						ChatSFXOpenedTimer# = 500.0						skip = True
 					EndIf
 				EndIf
 			EndIf
@@ -2761,7 +2762,5 @@ End Function
 
 
 
-
 ;~IDEal Editor Parameters:
-;~F#3D7#937
 ;~C#Blitz3D

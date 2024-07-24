@@ -40,9 +40,9 @@ Const GunSlot3 = 2
 Const MaxShootSounds = 4
 ;[End Block]
 
-Global AimCrossIMG
+Global AimCrossIMG%
 Global ExtraKevlarIMG
-Global BulletIcon%
+Global BulletIcon%Global KevlarIcon 
 Global P90BulletMeter
 Global Crowbar_HitPivot
 Global MuzzleFlash
@@ -60,8 +60,8 @@ Global GunPivot_X#
 Global GunPivot_XSide% = 0
 
 Global UsingScope%
-Global ScopeTexture
-Global ScopeCam
+Global ScopeTextureGlobal HoldingGun% 
+Global ScopeCamGlobal Weapon_CurrSlot% = 1
 Global ScopeZoom#
 Global ScopeNVG%
 
@@ -387,7 +387,7 @@ Function InitGuns()
 	AimCrossIMG = LoadImage_Strict("GFX\AimCross.png")
 	BulletIcon% = LoadImage_Strict("GFX\bulleticon.png")
 	P90BulletMeter = LoadImage_Strict("GFX\P90_BulletMeter.jpg")
-	ExtraKevlarIMG = LoadImage_Strict("GFX\ExtraKevlarMeter.jpg")
+	ExtraKevlarIMG = LoadImage_Strict("GFX\ExtraKevlarMeter.jpg")	KevlarIcon = LoadImage_Strict("GFX\kevlarIcon.png")
 	
 	g_I\KevlarSFX = LoadSound_Strict("SFX\kevlarsound.ogg") ; TODO THIS NEVER EXISTED
 	
@@ -1355,7 +1355,7 @@ Function ShootPlayer(x#,y#,z#,hitProb#=1.0,particles%=True,damage%=10)
 	Local pvt,i
 	
 	;muzzle flash
-	Local p.Particles = CreateParticle(x,y,z, 1, Rnd(0.08,0.1), 0.0, 5)
+	Local p.particles = CreateParticle(x,y,z, 1, Rnd(0.08,0.1), 0.0, 5)
 	TurnEntity p\obj, 0,0,Rnd(360)
 	p\Achange = -0.15
 	
@@ -1388,7 +1388,7 @@ Function ShootPlayer(x#,y#,z#,hitProb#=1.0,particles%=True,damage%=10)
 				
 				If particles Then 
 					;dust/smoke particles
-					p.Particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.03, 0, 80)
+					p.particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.03, 0, 80)
 					p\speed = 0.001
 					p\SizeChange = 0.003
 					p\A = 0.8
@@ -1396,7 +1396,7 @@ Function ShootPlayer(x#,y#,z#,hitProb#=1.0,particles%=True,damage%=10)
 					RotateEntity p\pvt, EntityPitch(pvt)-180, EntityYaw(pvt),0
 					
 					For i = 0 To Rand(2,3)
-						p.Particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.006, 0.003, 80)
+						p.particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.006, 0.003, 80)
 						p\speed = 0.02
 						p\A = 0.8
 						p\Achange = -0.01
@@ -1428,12 +1428,12 @@ Function ShootTarget(x#,y#,z#,n.NPCs,hitProb#=1.0,particles%=True,damage%=10)
 	Local pvt%,i%
 	
 	;muzzle flash
-	Local p.Particles = CreateParticle(x,y,z, 1, Rnd(0.08,0.1), 0.0, 5)
+	Local p.particles = CreateParticle(x,y,z, 1, Rnd(0.08,0.1), 0.0, 5)
 	TurnEntity p\obj, 0,0,Rnd(360)
 	p\Achange = -0.15
 	
 	If Rnd(1.0)=<hitProb Then
-		p.Particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 5, 0.06, 0.2, 80)
+		p.particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 5, 0.06, 0.2, 80)
 		p\speed = 0.001
 		p\SizeChange = 0.003
 		p\A = 0.8
@@ -1457,7 +1457,7 @@ Function ShootTarget(x#,y#,z#,n.NPCs,hitProb#=1.0,particles%=True,damage%=10)
 			
 			If particles Then 
 				;dust/smoke particles
-				p.Particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.03, 0, 80)
+				p.particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.03, 0, 80)
 				p\speed = 0.001
 				p\SizeChange = 0.003
 				p\A = 0.8
@@ -1465,7 +1465,7 @@ Function ShootTarget(x#,y#,z#,n.NPCs,hitProb#=1.0,particles%=True,damage%=10)
 				RotateEntity p\pvt, EntityPitch(pvt)-180, EntityYaw(pvt),0
 				
 				For i = 0 To Rand(2,3)
-					p.Particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.006, 0.003, 80)
+					p.particles = CreateParticle(PickedX(),PickedY(),PickedZ(), 0, 0.006, 0.003, 80)
 					p\speed = 0.02
 					p\A = 0.8
 					p\Achange = -0.01
@@ -1923,6 +1923,5 @@ End Function
 
 
 ;~IDEal Editor Parameters:
-;~F#8
-;~B#55#62F#647#65F#67A#68B#6A2#6B9#6D1
+;~B#58#633#64B#663#67E#68F#6A6#6BD#6D5
 ;~C#Blitz3D
